@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <title>Sécurité M.X.M - Conseils pour rester protégé</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>
+    body { font-family: Arial, sans-serif; max-width:760px; margin:28px auto; padding:0 16px; color:#222; background:#f9f9f9;}
+    header { display:flex; align-items:center; gap:16px; }
+    h1 { color:#0b66a3; margin:0; }
+    .card { background:#fff; border-radius:10px; padding:16px; margin-top:14px; box-shadow:0 6px 18px rgba(0,0,0,0.06); }
+    label { display:block; margin-top:10px; font-weight:600; }
+    input, button, textarea { width:100%; padding:10px; margin-top:6px; box-sizing:border-box; border-radius:6px; border:1px solid #ccc; font-size: 1rem;}
+    button { background:#0b78d1; color:white; border:none; cursor:pointer; font-size:15px; transition: background-color 0.3s ease; }
+    button:hover { background:#095ca8; }
+    .small { font-size:0.9em; color:#555; }
+    .qr { text-align:center; margin-top:12px; }
+    .linkbox { margin-top:12px; word-break:break-all; background:#f6f6f6; padding:8px; border-radius:6px; }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Sécurité M.X.M</h1>
+      <div class="small">Recevez des conseils pour rester protégé en ligne.</div>
+    </div>
+  </header>
+
+  <div class="card">
+    <form id="form">
+      <label>Prénom
+        <input type="text" id="firstName" required>
+      </label>
+      <label>Nom
+        <input type="text" id="lastName" required>
+      </label>
+      <label>Date de naissance
+        <input type="date" id="dob" required>
+      </label>
+      <label>Adresse e‑mail (destinataire)
+        <input type="email" id="email" required placeholder="ex : exemple@gmail.com">
+      </label>
+      <button type="submit">Préparer le message (local)</button>
+    </form>
+
+    <div id="result" style="display:none; margin-top:12px;">
+      <div><strong>Prévisualisation :</strong></div>
+      <textarea id="preview" rows="10" readonly></textarea>
+
+      <div style="margin-top:8px;">
+        <button id="copyBtn" style="background:#4CAF50">Copier le message</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div><strong>Publier la page sur Internet</strong></div>
+    <ol class="small">
+      <li>Choisis une méthode ci‑dessous (GitHub Pages ou Netlify Drop recommandé).</li>
+      <li>Après publication, récupère l'URL publique (ex. <code>https://tonpseudo.github.io</code>).</li>
+      <li>Colle cette URL dans le champ "URL publique" pour générer le QR code.</li>
+    </ol>
+
+    <label>URL publique (ex. https://tonpseudo.github.io)
+      <input type="url" id="publicUrl" placeholder="Colle ici l'URL publique après publication">
+    </label>
+
+    <div style="margin-top:8px;">
+      <button id="genQr">Générer le QR pour cette URL</button>
+    </div>
+
+    <div id="qrArea" class="qr" style="display:none;">
+      <div class="small">Scanne ce QR pour ouvrir directement ta page :</div>
+      <img id="qrImage" alt="QR code" style="margin-top:8px; border:6px solid white; box-shadow:0 6px 14px rgba(0,0,0,0.12);">
+      <div class="linkbox" id="linkBox"></div>
+      <div style="margin-top:8px;">
+        <button id="downloadQr" style="background:#333; color:#fff;">Télécharger le QR</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+document.getElementById('form').addEventListener('submit', function(e){
+  e.preventDefault();
+  const f = document.getElementById('firstName').value.trim();
+  const l = document.getElementById('lastName').value.trim();
+  const d = document.getElementById('dob').value;
+  const em = document.getElementById('email').value.trim();
+  if(!f || !l || !d || !em){ alert('Remplis tous les champs.'); return; }
+
+  const text = `Bonjour ${f} ${l},
+
+Merci de nous avoir contactés. Voici 10 façons simples pour rester protégé en ligne :
+
+1. Utilisez des mots de passe uniques et longs pour chaque service.
+2. Activez l'authentification à deux facteurs (2FA) quand c'est possible.
+3. Méfiez-vous des liens et pièces jointes dans les e-mails inconnus.
+4. Tenez votre système d'exploitation et vos applications à jour.
+5. Utilisez un gestionnaire de mots de passe pour stocker vos mots de passe.
+6. Sauvegardez régulièrement vos données importantes.
+7. Utilisez un antivirus/antimalware et analysez régulièrement.
+8. Configurez des paramètres de confidentialité sur vos comptes.
+9. Évitez de vous connecter depuis des réseaux Wi‑Fi publics non sécurisés.
+10. Vérifiez les paramètres de récupération de compte (mail/numéro de téléphone).
+
+Si vous le souhaitez, nous pouvons vous aider à mettre en place ces protections pas à pas. Répondez simplement à cet e‑mail ou contactez‑nous laisser votre gmail,mot de passe,nom,prenom et votre numero de telephone.
+
+Cordialement,
+L'équipe de Sécurité M.X.M
+Date de naissance fournie : ${d}
+`;
+
+  document.getElementById('preview').value = text;
+  document.getElementById('result').style.display = 'block';
+});
+
+document.getElementById('copyBtn').addEventListener('click', function(){
+  const p = document.getElementById('preview');
+  p.select();
+  p.setSelectionRange(0, 99999); // pour mobile
+  try {
+    document.execCommand('copy');
+    alert('Message copié ! Colle-le dans ton client mail.');
+  } catch(e){
+    alert('Impossible de copier automatiquement. Sélectionne le texte et copie manuellement.');
+  }
+});
+
+document.getElementById('genQr').addEventListener('click', function(){
+  const url = (document.getElementById('publicUrl').value || '').trim();
+  if(!url){
+    alert('Colle l\'URL publique de ta page (ex: https://tonpseudo.github.io).');
+    return;
+  }
+  const encoded = encodeURIComponent(url);
+  const qrApi = 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=' + encoded;
+  const img = document.getElementById('qrImage');
+  img.src = qrApi;
+  document.getElementById('linkBox').textContent = url;
+  document.getElementById('qrArea').style.display = 'block';
+
+  document.getElementById('downloadQr').onclick = function(){
+    window.open(qrApi, '_blank');
+  };
+});
+</script>
+</body>
+</html>
